@@ -134,29 +134,54 @@ class Renderer(object):
         #     y = int(y)
         #     self.glPixel(x, y, clr)
 
-
     def glTriangle(self, A, B, C, color = None):
 
-        if A.y < B.y:
-            A, B = B, A
-        if A.y < C.y:
-            A, C = C, A
-        if B.y < C.y:
-            B, C = C, B
+            if A.y < B.y:
+                A, B = B, A
+            if A.y < C.y:
+                A, C = C, A
+            if B.y < C.y:
+                B, C = C, B
 
-        try:
-            d_31 = (C.x - A.x) / (C.y - A.y)
-            d_32 = (C.x - A.x) / (C.y - B.y)
-        except:
-            pass
-        else:
-            x1 = C.x
-            x2 = C.x
+            def flatBottomTriangle(v1, v2, v3):
+                try:
+                    d_21 = (v2.x - v1.x) / (v2.y - v1.y)
+                    d_31 = (v3.x - v1.x) / (v3.y - v1.y)
+                except:
+                    pass
+                else:
+                    x1 = v2.x
+                    x2 = v3.x
+                    for y in range(v2.y, v1.y + 1):
+                        self.glLine(V2(int(x1),y), V2(int(x2),y), color)
+                        x1 += d_21
+                        x2 += d_31
 
-            for y in range(C.y, A.y + 1):
-                self.glLine(V2(int(A),y), V2(int(B),y), color)
-                x1 += d_31
-                x2 += d_32
+            def flatTopTriangle(v1, v2, v3):
+                try:
+                    d_31 = (v3.x - v1.x) / (v3.y - v1.y)
+                    d_32 = (v3.x - v2.x) / (v3.y - v2.y)
+                except:
+                    pass
+                else:
+                    x1 = v3.x
+                    x2 = v3.x
+
+                    for y in range(v3.y, v1.y + 1):
+                        self.glLine(V2(int(x1),y), V2(int(x2),y), color)
+                        x1 += d_31
+                        x2 += d_32
+
+            if B.y == C.y:
+                flatBottomTriangle(A, B, C)
+            elif A.y == B.y:
+                flatTopTriangle(A, B, C)
+            else:
+                D = V2(A.x + ((B.y - A.y) / (C.y - A.y)) * (C.x - A.x)   , B.y)
+                flatBottomTriangle(A, B, D)
+                flatTopTriangle(B, D, C)
+
+        
         
 
 
